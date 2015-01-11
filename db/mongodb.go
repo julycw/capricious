@@ -14,12 +14,13 @@ type MongoDBConn struct {
 }
 
 func (conn *MongoDBConn) GetContext(appName, contextName string) *MongoDBContext {
-	ctx := &MongoDBContext{
+	ctx := MongoDBContext{
 		conn: conn,
 	}
 	ctx.AppName = appName
 	ctx.ContextName = contextName
-	return ctx
+
+	return &ctx
 }
 
 //数据对象实体
@@ -61,7 +62,7 @@ func (ctx *MongoDBContext) Update(id string, data *DataStruct) error {
 		}
 
 		prev_data["_update_at"] = time.Now()
-		_, err := ctx.conn.session.DB(ctx.AppName).C(ctx.ContextName).Upsert(bson.M{
+		err := ctx.conn.session.DB(ctx.AppName).C(ctx.ContextName).Update(bson.M{
 			"_uuid": id,
 		}, prev_data)
 
@@ -109,28 +110,4 @@ func (ctx *MongoDBContext) Delete(id string) error {
 func (ctx *MongoDBContext) Count() int {
 	count, _ := ctx.conn.session.DB(ctx.AppName).C(ctx.ContextName).Count()
 	return count
-}
-
-var conn *MongoDBConn = nil
-
-//通过单例模式获取数据库连接
-func GetConn() (*MongoDBConn, error) {
-	if conn == nil {
-		//一般来说url从配置文件中读取
-		url := "127.0.0.1"
-		sess, err := mgo.Dial(url)
-
-		// Optional. Switch the session to a monotonic behavior.
-		sess.SetMode(mgo.Monotonic, true)
-
-		if err != nil {
-			return nil, err
-		}
-		conn = &MongoDBConn{
-			services: []string{url},
-			session:  sess,
-		}
-	}
-
-	return conn, nil
 }
