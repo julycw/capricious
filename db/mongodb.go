@@ -14,13 +14,13 @@ type MongoDBConn struct {
 }
 
 func (conn *MongoDBConn) GetContext(appName, contextName string) *MongoDBContext {
-	ctx := MongoDBContext{
+	ctx := &MongoDBContext{
 		conn: conn,
 	}
 	ctx.AppName = appName
 	ctx.ContextName = contextName
 
-	return &ctx
+	return ctx
 }
 
 //数据对象实体

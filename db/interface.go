@@ -2,7 +2,7 @@ package db
 
 import ()
 
-type ContextInterface interface {
+type IContext interface {
 	IsExist() bool
 
 	//输入：id:主键，data:数据
@@ -28,8 +28,16 @@ type ContextInterface interface {
 	Count() int
 }
 
+type IConnection interface {
+	GetContext(appName, contextName string) *IContext
+}
+
+type Connection struct {
+	IConnection
+}
+
 type Context struct {
-	ContextInterface
+	IContext
 	AppName     string
 	ContextName string
 }
