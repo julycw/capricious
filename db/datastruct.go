@@ -5,13 +5,12 @@ import ()
 type DataStruct map[string]interface{}
 
 func NewDataStruct(data map[string]interface{}) DataStruct {
-	var size int = 0
-	if data != nil {
-		size = len(data)
-	}
-	d := make(DataStruct, size)
+	var size int
+	var d DataStruct
 
 	if data != nil {
+		size = len(data)
+		d = make(DataStruct, size)
 		for key, value := range data {
 			d[key] = value
 		}

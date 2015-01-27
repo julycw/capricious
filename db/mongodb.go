@@ -13,9 +13,9 @@ type MongoDBConn struct {
 	session  *mgo.Session
 }
 
-func (conn *MongoDBConn) GetContext(appName, contextName string) *MongoDBContext {
-	ctx := &MongoDBContext{
-		conn: conn,
+func (conn MongoDBConn) GetContext(appName, contextName string) IContext {
+	ctx := MongoDBContext{
+		conn: &conn,
 	}
 	ctx.AppName = appName
 	ctx.ContextName = contextName
@@ -29,11 +29,11 @@ type MongoDBContext struct {
 	Context
 }
 
-func (ctx *MongoDBContext) IsExist() bool {
+func (ctx MongoDBContext) IsExist() bool {
 	return ctx.Count() > 0
 }
 
-func (ctx *MongoDBContext) Insert(data *DataStruct) (string, error) {
+func (ctx MongoDBContext) Insert(data *DataStruct) (string, error) {
 	clearData(data)
 
 	bson_data := make(bson.M, 0)
@@ -51,7 +51,7 @@ func (ctx *MongoDBContext) Insert(data *DataStruct) (string, error) {
 	return bson_data["_uuid"].(string), nil
 }
 
-func (ctx *MongoDBContext) Update(id string, data *DataStruct) error {
+func (ctx MongoDBContext) Update(id string, data *DataStruct) error {
 	clearData(data)
 
 	if prev_data, err := ctx.Get(id); err != nil {
@@ -74,7 +74,7 @@ func (ctx *MongoDBContext) Update(id string, data *DataStruct) error {
 	return nil
 }
 
-func (ctx *MongoDBContext) Get(id string) (DataStruct, error) {
+func (ctx MongoDBContext) Get(id string) (DataStruct, error) {
 	var result DataStruct
 	err := ctx.conn.session.DB(ctx.AppName).C(ctx.ContextName).Find(bson.M{
 		"_uuid": id,
@@ -86,7 +86,7 @@ func (ctx *MongoDBContext) Get(id string) (DataStruct, error) {
 	return result, nil
 }
 
-func (ctx *MongoDBContext) GetAll() ([]DataStruct, int, error) {
+func (ctx MongoDBContext) GetAll() ([]DataStruct, int, error) {
 	var results []DataStruct = make([]DataStruct, 0)
 	err := ctx.conn.session.DB(ctx.AppName).C(ctx.ContextName).Find(nil).All(&results)
 
@@ -96,7 +96,7 @@ func (ctx *MongoDBContext) GetAll() ([]DataStruct, int, error) {
 	return results, len(results), nil
 }
 
-func (ctx *MongoDBContext) Delete(id string) error {
+func (ctx MongoDBContext) Delete(id string) error {
 	err := ctx.conn.session.DB(ctx.AppName).C(ctx.ContextName).Remove(bson.M{
 		"_uuid": id,
 	})
@@ -107,7 +107,7 @@ func (ctx *MongoDBContext) Delete(id string) error {
 	return nil
 }
 
-func (ctx *MongoDBContext) Count() int {
+func (ctx MongoDBContext) Count() int {
 	count, _ := ctx.conn.session.DB(ctx.AppName).C(ctx.ContextName).Count()
 	return count
 }

@@ -28,7 +28,7 @@ type capricious struct {
 	AccessToken string
 	APPName     string
 
-	dbConn *db.MongoDBConn
+	dbConn *db.IConnection
 }
 
 var MaxMemory = int64(1024 * 1024 * 10)
@@ -153,8 +153,9 @@ func (this *capricious) Prepare(ctx *macaron.Context) bool {
 	return true
 }
 
-func (this *capricious) getContext() *db.MongoDBContext {
-	return this.dbConn.GetContext(this.APPName, this.ObjectName)
+func (this *capricious) getContext() db.IContext {
+	// println(this.dbConn.GetContext)
+	return (*this.dbConn).GetContext(this.APPName, this.ObjectName)
 }
 
 func (this *capricious) parseData(ctx *macaron.Context) db.DataStruct {
